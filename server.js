@@ -37,7 +37,6 @@ const MODEL = process.env.MODEL || "gpt-4o-mini";
 const FRONTEND_URL = process.env.FRONTEND_URL || "*";
 
 // ---------- База данных SQLite ----------
-const db = new Database(path.join(__dirname, "data.sqlite"));
 db.pragma("journal_mode = WAL");
 db.exec(`
 CREATE TABLE IF NOT EXISTS users (
