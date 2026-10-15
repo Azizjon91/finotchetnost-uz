@@ -25,7 +25,7 @@ const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const Database = require("better-sqlite3");
+const Database = require("sqlite3");
 
 // ---------- Конфигурация ----------
 const PORT = process.env.PORT || 3000;
