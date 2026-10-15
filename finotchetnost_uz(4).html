@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1F4E78">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="%231F4E78"/><text x="50" y="66" font-size="44" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">Сум</text></svg>'>
+<title>ФинОтчётность Уз — Баланс и ОФР (НСБУ №21)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(typeof pdfjsLib!=='undefined'){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}</script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; color: #222; padding-bottom: 70px; }
+header { background: #1F4E78; color: #fff; padding: 14px 16px; position: sticky; top: 0; z-index: 10; }
+header h1 { font-size: 16px; }
+header .meta { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+header input, header select { border: none; border-radius: 8px; padding: 6px 8px; font-size: 13px; }
+nav.tabs { display: flex; background: #fff; border-bottom: 1px solid #ddd; position: sticky; top: 64px; z-index: 9; }
+nav.tabs button { flex: 1; padding: 12px 2px; border: none; background: none; font-size: 12.5px; font-weight: 600; color: #777; border-bottom: 3px solid transparent; cursor: pointer; }
+nav.tabs button.active { color: #1F4E78; border-bottom-color: #1F4E78; }
+main { padding: 12px; max-width: 760px; margin: 0 auto; }
+.card { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+td { padding: 8px 6px; border-bottom: 1px solid #eee; vertical-align: middle; }
+tr.sub td { background: #B4C6E7; font-weight: 700; color: #1F4E78; }
+tr.total td { background: #FCE4D6; font-weight: 700; }
+tr.grand td { background: #1F4E78; color: #fff; font-weight: 700; font-size: 14px; }
+.code { color: #888; font-size: 11.5px; white-space: nowrap; width: 52px; }
+.amt { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+input.amt, input.oamt, .fxin { width: 100%; min-width: 60px; text-align: right; border: 1px solid #ccc; border-radius: 6px; padding: 6px; font-size: 14px; }
+input.amt:focus, input.oamt:focus { border-color: #1F4E78; outline: none; }
+.check { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 10px; font-weight: 700; margin-top: 10px; }
+.check.ok { background: #d4edda; color: #155724; }
+.check.bad { background: #f8d7da; color: #721c24; }
+#analysis { margin-top: 8px; font-size: 13px; }
+#analysis div { padding: 7px 10px; border-radius: 8px; margin-bottom: 5px; line-height: 1.4; }
+#analysis .err, .r-bad { background: #f8d7da; color: #721c24; }
+#analysis .warn, .r-mid { background: #fff3cd; color: #856404; }
+#analysis .info, .r-ok { background: #d4edda; color: #155724; }
+#ratioTable td { border-bottom: 1px solid #eee; }
+.btnrow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.btn { flex: 1; min-width: 100px; padding: 11px; border: none; border-radius: 10px; font-size: 13.5px; font-weight: 600; cursor: pointer; background: #1F4E78; color: #fff; }
+.btn.ghost { background: #e9eef5; color: #1F4E78; }
+.fxcard input, .fxcard select { padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 13.5px; }
+.fxcard select { width: 100%; }
+#chatlog { height: 42vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px 0; }
+.msg { max-width: 85%; padding: 9px 12px; border-radius: 14px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; }
+.msg.user { align-self: flex-end; background: #1F4E78; color: #fff; border-bottom-right-radius: 4px; }
+.msg.bot { align-self: flex-start; background: #eef1f5; border-bottom-left-radius: 4px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.chip { background: #e9eef5; color: #1F4E78; border: 1px solid #b9c8dd; border-radius: 20px; padding: 6px 12px; font-size: 12.5px; cursor: pointer; }
+#chatin { display: flex; gap: 8px; margin-top: 8px; }
+#chatin input { flex: 1; border: 1px solid #ccc; border-radius: 24px; padding: 11px 14px; font-size: 14px; }
+#chatin button { border: none; border-radius: 50%; width: 46px; height: 46px; background: #1F4E78; color: #fff; font-size: 18px; cursor: pointer; }
+.syncbox { margin-top: 12px; border-top: 1px dashed #ccc; padding-top: 10px; font-size: 13px; }
+.syncbox summary { font-weight: 700; cursor: pointer; color: #1F4E78; padding: 4px 0; }
+.syncbox input[type="text"], .syncbox input[type="password"] { width: 100%; padding: 9px; margin: 4px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
+.syncbox label { display: block; margin: 6px 0; }
+.syncbox small { color: #777; display: block; margin-top: 6px; line-height: 1.5; }
+.hidden { display: none !important; }
+.pbar { height: 10px; background: #e9eef5; border-radius: 6px; overflow: hidden; margin-top: 10px; }
+.pbar > div { height: 100%; width: 0%; background: linear-gradient(90deg, #1F4E78, #3b78b5); border-radius: 6px; transition: width .3s ease; }
+.note { font-size: 12px; color: #777; margin-top: 8px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📊 ФинОтчётность Узбекистан <span style="font-weight:400;font-size:12px;">(НСБУ №21)</span></h1>
+  <div class="meta">
+    <input type="date" id="repdate">
+    <select id="period"><option>Месяц</option><option>Квартал</option><option selected>Год</option></select>
+    <select id="unit"><option value="1">в сумах</option><option value="1000">в тыс. сумов</option></select>
+    <span id="netdot" style="margin-left:auto;font-size:12px;font-weight:700;">🟢 онлайн</span>
+  </div>
+</header>
+<nav class="tabs">
+  <button class="active" onclick="showTab('bal',this)">Баланс</button>
+  <button onclick="showTab('ofr',this)">ОФР</button>
+  <button onclick="showTab('an',this)">📈 Анализ</button>
+  <button onclick="showTab('ai',this)">🤖 Ассистент</button>
+</nav>
+<main>
+  <section id="tab-bal">
+    <div class="card">
+      <b>✨ Умный ввод</b> <span class="note" style="display:inline">— напишите или скажите голосом, программа разнесёт по счетам</span>
+      <textarea id="smarttxt" style="width:100%;margin-top:8px;padding:10px;border:1px solid #ccc;border-radius:10px;font-size:14px;min-height:84px;" placeholder="Пример:&#10;выручка 150 млн&#10;касса 5 200 000&#10;зарплата к оплате 12 млн&#10;кредиторка поставщикам 30 млн&#10;взяли кредит долгосрочный 200 млн"></textarea>
+      <div class="btnrow">
+        <button class="btn ghost" style="flex:0 1 auto;padding:11px 16px;" onclick="startVoice()">🎤 Голос</button>
+        <button class="btn" onclick="smartParse()">Разнести (офлайн-правила)</button>
+        <button class="btn ghost" onclick="smartParseAI()">Через ИИ</button>
+      </div>
+      <div id="smartres" class="note"></div>
+    </div>
+    <div class="card">
+      <table id="bal">
+        <tr><td><b>Статья</b></td><td class="code"><b>Счёт</b></td><td class="amt"><b>Сумма</b></td></tr>
+        <tr class="sub"><td colspan="2">I. ВНЕОБОРОТНЫЕ АКТИВЫ</td><td></td></tr>
+<tr class="item" data-grp="vna" data-code="0100" data-sub="0"><td>Основные средства</td><td class="code">0100</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="vna" data-code="0200" data-sub="0"><td>Нематериальные активы</td><td class="code">0200</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="vna" data-code="0800" data-sub="0"><td>Капитальные вложения</td><td class="code">0800</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="vna" data-code="0910" data-sub="0"><td>Векселя полученные</td><td class="code">0910</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="vna" data-code="0940" data-sub="0"><td>Прочая долгосрочная дебиторская задолженность</td><td class="code">0940</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="vna" data-code="0950" data-sub="0"><td>Отложенные налоговые активы (ОНА)</td><td class="code">0950</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="total"><td colspan="2">ИТОГО внеоборотные активы</td><td class="amt" id="t_vna">0</td></tr>
+<tr class="sub"><td colspan="2">II. ОБОРОТНЫЕ АКТИВЫ</td><td></td></tr>
+<tr class="item" data-grp="ob" data-code="1010" data-sub="0"><td>Сырьё и материалы</td><td class="code">1010</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="1020" data-sub="0"><td>Покупные полуфабрикаты и материалы</td><td class="code">1020</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="1030" data-sub="0"><td>Топливо</td><td class="code">1030</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="1040" data-sub="0"><td>Запасные части</td><td class="code">1040</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="GP" data-sub="0"><td>Готовая продукция</td><td class="code">—</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="TOV" data-sub="0"><td>Товары</td><td class="code">—</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="4010" data-sub="0"><td>Дебиторская задолженность покупателей и заказчиков</td><td class="code">4010</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="4410" data-sub="0"><td>НДС, подлежащий возмещению</td><td class="code">4410</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="4910" data-sub="1"><td>Резерв по сомнительным долгам (вычитается)</td><td class="code">4910</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="5010" data-sub="0"><td>Касса в национальной валюте</td><td class="code">5010</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="5020" data-sub="0"><td>Касса в иностранной валюте</td><td class="code">5020</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="5110" data-sub="0"><td>Расчётный счёт</td><td class="code">5110</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="5210" data-sub="0"><td>Валютные счета внутри страны</td><td class="code">5210</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="5220" data-sub="0"><td>Валютные счета за рубежом</td><td class="code">5220</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="5610" data-sub="0"><td>Денежные эквиваленты</td><td class="code">5610</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="5710" data-sub="0"><td>Денежные средства (переводы) в пути</td><td class="code">5710</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="5810" data-sub="0"><td>Краткосрочные инвестиции (ценные бумаги)</td><td class="code">5810</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="5830" data-sub="0"><td>Краткосрочные займы выданные</td><td class="code">5830</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ob" data-code="5920" data-sub="0"><td>Прочие текущие активы</td><td class="code">5920</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="total"><td colspan="2">ИТОГО оборотные активы</td><td class="amt" id="t_ob">0</td></tr>
+<tr class="grand"><td colspan="2">ИТОГО АКТИВЫ</td><td class="amt" id="t_A">0</td></tr>
+<tr class="sub"><td colspan="2">III. ТЕКУЩИЕ ОБЯЗАТЕЛЬСТВА</td><td></td></tr>
+<tr class="item" data-grp="ca" data-code="6010" data-sub="0"><td>Платежи поставщикам и подрядчикам</td><td class="code">6010</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6020" data-sub="0"><td>Векселя выданные</td><td class="code">6020</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6250" data-sub="0"><td>Отсроченный налог на прибыль (текущая часть)</td><td class="code">6250</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6310" data-sub="0"><td>Авансы, полученные от покупателей</td><td class="code">6310</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6410" data-sub="0"><td>Задолженность по платежам в бюджет</td><td class="code">6410</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6510" data-sub="0"><td>Платежи по страхованию</td><td class="code">6510</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6520" data-sub="0"><td>Платежи в государственные целевые фонды</td><td class="code">6520</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6610" data-sub="0"><td>Дивиденды к оплате</td><td class="code">6610</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6710" data-sub="0"><td>Задолженность по оплате труда</td><td class="code">6710</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6720" data-sub="0"><td>Депонированная заработная плата</td><td class="code">6720</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6810" data-sub="0"><td>Краткосрочные банковские кредиты</td><td class="code">6810</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6820" data-sub="0"><td>Краткосрочные займы</td><td class="code">6820</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6920" data-sub="0"><td>Начисленные проценты</td><td class="code">6920</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6950" data-sub="0"><td>Долгосрочные обязательства — текущая часть</td><td class="code">6950</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="ca" data-code="6990" data-sub="0"><td>Прочие обязательства</td><td class="code">6990</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="total"><td colspan="2">ИТОГО текущие обязательства</td><td class="amt" id="t_ca">0</td></tr>
+<tr class="sub"><td colspan="2">IV. ДОЛГОСРОЧНЫЕ ОБЯЗАТЕЛЬСТВА</td><td></td></tr>
+<tr class="item" data-grp="lta" data-code="7010" data-sub="0"><td>Долгосрочные платежи поставщикам и подрядчикам</td><td class="code">7010</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="lta" data-code="7250" data-sub="0"><td>Отложенные налоговые обязательства (ОНО)</td><td class="code">7250</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="lta" data-code="7310" data-sub="0"><td>Авансы, полученные (долгосрочная часть)</td><td class="code">7310</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="lta" data-code="7810" data-sub="0"><td>Долгосрочные банковские кредиты</td><td class="code">7810</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="lta" data-code="7820" data-sub="0"><td>Долгосрочные займы</td><td class="code">7820</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="lta" data-code="7910" data-sub="0"><td>Финансовая аренда к оплате</td><td class="code">7910</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="lta" data-code="7920" data-sub="0"><td>Прочие долгосрочные задолженности</td><td class="code">7920</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="total"><td colspan="2">ИТОГО долгосрочные обязательства</td><td class="amt" id="t_lta">0</td></tr>
+<tr class="sub"><td colspan="2">V. СОБСТВЕННЫЙ КАПИТАЛ</td><td></td></tr>
+<tr class="item" data-grp="cap" data-code="8300" data-sub="0"><td>Уставный капитал</td><td class="code">8300</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="item" data-grp="cap" data-code="8700" data-sub="0"><td>Нераспределённая прибыль (непокрытый убыток) отчётного периода</td><td class="code">8700</td><td><input type="text" inputmode="decimal" class="amt" value="0"></td></tr>
+<tr class="total"><td colspan="2">ИТОГО капитал</td><td class="amt" id="t_cap">0</td></tr>
+<tr class="grand"><td colspan="2">ИТОГО ПАССИВЫ</td><td class="amt" id="t_P">0</td></tr>
+
+      </table>
+      <div class="check ok" id="balcheck"><span>Проверка баланса (А = П)</span><span id="balchecktxt">—</span></div>
+      <div id="analysis"></div>
+      <div class="btnrow">
+        <button class="btn" onclick="downloadXLSX()">⬇ Скачать Excel (.xlsx)</button>
+        <button class="btn ghost" onclick="downloadCSV()">CSV</button>
+        <button class="btn ghost" onclick="window.print()">🖨 PDF</button>
+        <button class="btn ghost" onclick="resetAll()">Сброс</button>
+      </div>
+      <p class="note">Данные сохраняются автоматически на устройстве. Ярлык: меню браузера → «Добавить на главный экран».</p>
+      <details class="syncbox"><summary>☁️ Синхронизация между устройствами (JSONBin.io — бесплатно)</summary>
+        <input type="text" id="cbin" placeholder="Bin ID">
+        <input type="text" id="ckey" placeholder="X-Master-Key">
+        <label><input type="checkbox" id="cauto"> Автосохранение в облако после изменений</label>
+        <div class="btnrow">
+          <button class="btn ghost" onclick="cloudSave(false)">↑ Сохранить в облако</button>
+          <button class="btn ghost" onclick="cloudLoad()">↓ Загрузить из облака</button>
+        </div>
+        <div id="syncstatus" class="note">☁️ Не настроено</div>
+        <small>jsonbin.io → JSON Bin → New Bin → скопируйте ID и ключ (API Keys → X-Master-Key).</small>
+      </details>
+      <details class="syncbox"><summary>👤 Личный кабинет (регистрация/вход на сервере)</summary>
+        <input type="text" id="srv_email" placeholder="E-mail" autocomplete="email">
+        <input type="password" id="srv_pass" placeholder="Пароль (мин. 6 символов)" autocomplete="current-password">
+        <div class="btnrow">
+          <button class="btn ghost" onclick="srvAuth('register')">Регистрация</button>
+          <button class="btn ghost" onclick="srvAuth('login')">Вход</button>
+          <button class="btn ghost" onclick="srvOut()">Выйти</button>
+        </div>
+        <div class="btnrow">
+          <button class="btn" onclick="srvSave()">↑ Сохранить отчёт на сервере</button>
+          <button class="btn ghost" onclick="srvLoad()">↓ Загрузить с сервера</button>
+        </div>
+        <div id="srv_status" class="note">URL сервера укажите в настройках ИИ (поле «URL прокси-сервера»). Данные хранятся в вашей базе на сервере, доступны с любого устройства.</div>
+      </details>
+    </div>
+    <div class="card fxcard">
+      <b>💱 Валютный контроль и переоценка (5020 / 5210 / 5220)</b>
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;">
+        <label style="font-size:12px;">Дата курса ЦБ: <input type="date" id="fx_date" style="padding:7px;border:1px solid #ccc;border-radius:6px;"></label>
+        <button class="btn ghost" style="flex:0 1 auto;padding:9px 14px;" onclick="loadRates()">🔄 Курсы ЦБ РУз (cbu.uz)</button>
+        <button class="btn" style="flex:0 1 auto;padding:9px 14px;" onclick="applyFx()">Перенести в баланс</button>
+      </div>
+      <table style="margin-top:8px;">
+        <tr><td><b>Счёт</b></td><td><b>Валюта</b></td><td><b>Сумма в валюте</b></td><td><b>Курс нач.</b></td><td><b>Курс кон.</b></td><td class="amt"><b>В сумах (кон.)</b></td><td class="amt"><b>Курсовая разница</b></td></tr>
+        <tr data-fx="0" data-code="5020"><td>Касса (инвалюта)<br><span class="code">5020</span></td><td><select class="fx_ccy"><option selected>USD</option><option>EUR</option><option>RUB</option><option>KZT</option><option>CNY</option><option>GBP</option></select></td><td><input type="text" inputmode="decimal" class="fx_amt" placeholder="0"></td><td><input type="text" inputmode="decimal" class="fx_r0" placeholder="нач."></td><td><input type="text" inputmode="decimal" class="fx_r1" placeholder="кон."></td><td class="amt fx_sum">0</td><td class="amt fx_diff">0</td></tr>
+<tr data-fx="1" data-code="5210"><td>Валютные счета внутри страны<br><span class="code">5210</span></td><td><select class="fx_ccy"><option selected>USD</option><option>EUR</option><option>RUB</option><option>KZT</option><option>CNY</option><option>GBP</option></select></td><td><input type="text" inputmode="decimal" class="fx_amt" placeholder="0"></td><td><input type="text" inputmode="decimal" class="fx_r0" placeholder="нач."></td><td><input type="text" inputmode="decimal" class="fx_r1" placeholder="кон."></td><td class="amt fx_sum">0</td><td class="amt fx_diff">0</td></tr>
+<tr data-fx="2" data-code="5220"><td>Валютные счета за рубежом<br><span class="code">5220</span></td><td><select class="fx_ccy"><option selected>USD</option><option>EUR</option><option>RUB</option><option>KZT</option><option>CNY</option><option>GBP</option></select></td><td><input type="text" inputmode="decimal" class="fx_amt" placeholder="0"></td><td><input type="text" inputmode="decimal" class="fx_r0" placeholder="нач."></td><td><input type="text" inputmode="decimal" class="fx_r1" placeholder="кон."></td><td class="amt fx_sum">0</td><td class="amt fx_diff">0</td></tr>
+
+      </table>
+      <div id="fx_result" class="note"></div>
+      <div class="note">Курсовая разница относится на 9540 (доход) или 9620 (убыток). Остатки на дату баланса — по курсу ЦБ РУз на отчётную дату.</div>
+    </div>
+    <div class="card">
+      <b>📷 OCR: счета-фактуры и чеки</b>
+      <input type="file" id="ocrfile" accept="image/*,application/pdf" style="margin:8px 0;">
+      <div class="btnrow"><button class="btn" onclick="runOCR()">Распознать и разнести</button></div>
+      <div class="pbar"><div id="ocrbar"></div></div>
+      <img id="ocr_prev" style="max-width:100%;border-radius:8px;margin-top:8px;">
+      <div id="ocr_status" class="note"></div>
+      <div class="note">Распознавание выполняется на устройстве (Tesseract.js) — файл в интернет не уходит. Результат попадает в «Умный ввод» — проверьте и поправьте перед разноской. Качество зависит от чёткости фото; печатный текст распознаётся лучше рукописного.</div>
+    </div>
+  </section>
+  <section id="tab-ofr" class="hidden">
+    <div class="card">
+      <table id="ofr">
+        <tr><td colspan="2"><b>Отчёт о финансовых результатах (ОФР)</b></td><td class="amt"><b>Сумма</b></td></tr>
+        <tr class="sub"><td colspan="2">Доходы от реализации:</td><td></td></tr>
+<tr class="oitem"><td>Доходы от реализации готовой продукции</td><td class="code">9010</td><td><input type="text" inputmode="decimal" class="oamt" id="o_in1" value="0"></td></tr>
+<tr class="oitem"><td>Доходы от реализации товаров</td><td class="code">9020</td><td><input type="text" inputmode="decimal" class="oamt" id="o_in2" value="0"></td></tr>
+<tr class="oitem"><td>Доходы от выполнения работ и оказания услуг</td><td class="code">9030</td><td><input type="text" inputmode="decimal" class="oamt" id="o_in3" value="0"></td></tr>
+<tr class="total"><td colspan="2">Итого доходы от реализации</td><td class="amt" id="t_inc">0</td></tr>
+<tr class="oitem"><td>(−) Себестоимость реализованной продукции (товаров, работ, услуг)</td><td class="code">9110–9130</td><td><input type="text" inputmode="decimal" class="oamt" id="o_cogs" value="0"></td></tr>
+<tr class="total"><td colspan="2">Валовая прибыль</td><td class="amt" id="t_gross">0</td></tr>
+<tr class="oitem"><td>(−) Расходы по реализации</td><td class="code">9410</td><td><input type="text" inputmode="decimal" class="oamt" id="o_sell" value="0"></td></tr>
+<tr class="oitem"><td>(−) Административные расходы</td><td class="code">9420</td><td><input type="text" inputmode="decimal" class="oamt" id="o_adm" value="0"></td></tr>
+<tr class="oitem"><td>(−) Прочие операционные расходы</td><td class="code">9430</td><td><input type="text" inputmode="decimal" class="oamt" id="o_oth" value="0"></td></tr>
+<tr class="total"><td colspan="2">Операционная прибыль</td><td class="amt" id="t_op">0</td></tr>
+<tr class="oitem"><td>Роялти к получению</td><td class="code">9510</td><td><input type="text" inputmode="decimal" class="oamt" id="o_roy" value="0"></td></tr>
+<tr class="oitem"><td>Дивиденды к получению</td><td class="code">9520</td><td><input type="text" inputmode="decimal" class="oamt" id="o_div" value="0"></td></tr>
+<tr class="oitem"><td>Проценты к получению</td><td class="code">9530</td><td><input type="text" inputmode="decimal" class="oamt" id="o_pct" value="0"></td></tr>
+<tr class="oitem"><td>Доходы от валютных курсовых разниц</td><td class="code">9540</td><td><input type="text" inputmode="decimal" class="oamt" id="o_fx1" value="0"></td></tr>
+<tr class="oitem"><td>Прочие доходы от финансовой деятельности</td><td class="code">9590</td><td><input type="text" inputmode="decimal" class="oamt" id="o_finc" value="0"></td></tr>
+<tr class="oitem"><td>(−) Убытки от валютных курсовых разниц</td><td class="code">9620</td><td><input type="text" inputmode="decimal" class="oamt" id="o_fx2" value="0"></td></tr>
+<tr class="oitem"><td>(−) Расходы в виде процентов и прочие финрасходы</td><td class="code">9610, 9690</td><td><input type="text" inputmode="decimal" class="oamt" id="o_fexp" value="0"></td></tr>
+<tr class="total"><td colspan="2">Прибыль до налогообложения</td><td class="amt" id="t_pbt">0</td></tr>
+<tr class="oitem"><td>Чрезвычайные прибыли</td><td class="code">9710</td><td><input type="text" inputmode="decimal" class="oamt" id="o_ex1" value="0"></td></tr>
+<tr class="oitem"><td>(−) Чрезвычайные убытки</td><td class="code">9720</td><td><input type="text" inputmode="decimal" class="oamt" id="o_ex2" value="0"></td></tr>
+<tr class="oitem"><td>(−) Расходы по налогу на прибыль</td><td class="code">9810</td><td><input type="text" inputmode="decimal" class="oamt" id="o_tax" value="0"></td></tr>
+<tr class="grand"><td colspan="2">КОНЕЧНЫЙ ФИНАНСОВЫЙ РЕЗУЛЬТАТ (ЧИСТАЯ ПРИБЫЛЬ)</td><td class="amt" id="t_net">0</td></tr>
+
+      </table>
+      <p class="note">Строки «(−)» вводятся положительными — вычитаются автоматически. Итог 9910 должен совпадать с нераспределённой прибылью (8700) в балансе.</p>
+    </div>
+  </section>
+  <section id="tab-an" class="hidden">
+    <div class="card">
+      <b>📈 Финансовые коэффициенты</b> <span class="note" style="display:inline">(рассчитываются автоматически из баланса и ОФР)</span>
+      <table id="ratioTable" style="margin-top:8px;"></table>
+    </div>
+    <div class="card">
+      <b>🔎 Расширенный аудит</b> <span class="note" style="display:inline">(оборотные показатели за длительность выбранного периода)</span>
+      <table id="auditTable" style="margin-top:8px;"></table>
+    </div>
+    <div class="card">
+      <b>🧾 Налоговый контроль</b>
+      <div id="taxBlock" style="font-size:13.5px;line-height:1.6;margin-top:6px;"></div>
+    </div>
+  </section>
+  <section id="tab-ai" class="hidden">
+    <div class="card">
+      <div id="chatlog"><div class="msg bot">Привет! Я помощник по НСБУ Узбекистана. Спросите про любой счёт («что такое 7810»), проверку баланса, ОФР, НДС — или нажмите вопрос ниже.</div></div>
+      <div class="chips">
+        <span class="chip" onclick="ask('Проверь баланс')">Проверь баланс</span>
+        <span class="chip" onclick="ask('Что такое счёт 7810?')">Что такое 7810?</span>
+        <span class="chip" onclick="ask('Почему баланс не сходится?')">Почему не сходится?</span>
+        <span class="chip" onclick="ask('Как заполнить ОФР?')">Как заполнить ОФР?</span>
+        <span class="chip" onclick="ask('Расскажи про курсовые разницы')">Курсовые разницы</span>
+      </div>
+      <div id="chatin"><input id="chatinput" placeholder="Напишите вопрос..." onkeydown="if(event.key==='Enter')sendMsg()"><button onclick="sendMsg()">➤</button></div>
+      <details class="syncbox"><summary>⚙️ Настройки ИИ и безопасность</summary>
+        <input type="password" id="aikey" placeholder="API-ключ OpenAI (sk-...) — если без прокси">
+        <label><input type="checkbox" id="aishow"> показать ключ</label>
+        <label><input type="checkbox" id="aion"> использовать ИИ-ассистента онлайн</label>
+        <label><input type="checkbox" id="aisave"> 🔒 хранить ключ на устройстве (иначе — только до закрытия страницы)</label>
+        <input type="text" id="aiproxy" placeholder="URL прокси-сервера (https://...) — если задан, ключ не нужен">
+        <div class="btnrow"><button class="btn ghost" onclick="delKey()">🗑 Удалить ключ</button></div>
+        <small>⚠️ Без прокси ключ виден браузеру и может быть извлечён при компрометации устройства. Рекомендуется: поднять бесплатный прокси (файл server.js из комплекта) и хранить ключ только на сервере. Лимиты трат — в кабинете OpenAI.</small>
+      </details>
+    </div>
+  </section>
+</main>
+<script>
+const fmt = n => (n||0).toLocaleString('ru-RU',{maximumFractionDigits:2});
+const parseNum = s => { let n = parseFloat(String(s).replace(/[\s\u00A0]/g,'').replace(',','.')); return isNaN(n)?0:n; };
+const unit = () => parseInt(document.getElementById('unit').value);
+let LAST = {};
+const gv = id => parseNum(document.getElementById(id).value) / unit();
+
+function calc(){
+  let sums = {vna:0, ob:0, ca:0, lta:0, cap:0}, vals = {};
+  document.querySelectorAll('#bal tr.item').forEach(tr=>{
+    let v = parseNum(tr.querySelector('input').value) / unit();
+    vals[tr.dataset.code] = v;
+    sums[tr.dataset.grp] += tr.dataset.sub == '1' ? -Math.abs(v) : v;
+  });
+  for(let g in sums){ let el = document.getElementById('t_'+g); if(el) el.textContent = fmt(sums[g]); }
+  let A = sums.vna + sums.ob, P = sums.ca + sums.lta + sums.cap;
+  document.getElementById('t_A').textContent = fmt(A);
+  document.getElementById('t_P').textContent = fmt(P);
+  let diff = A - P, c = document.getElementById('balcheck');
+  if(Math.abs(diff) < 0.005){ c.className='check ok'; document.getElementById('balchecktxt').textContent='✓ Сходится'; }
+  else { c.className='check bad'; document.getElementById('balchecktxt').textContent='Разница: '+fmt(diff); }
+  let g = id => parseNum(document.getElementById(id).value) / unit();
+  let inc = g('o_in1')+g('o_in2')+g('o_in3');
+  let gross = inc - g('o_cogs');
+  let op = gross - g('o_sell') - g('o_adm') - g('o_oth');
+  let pbt = op + g('o_roy') + g('o_div') + g('o_pct') + g('o_fx1') + g('o_finc') - g('o_fx2') - g('o_fexp');
+  let net = pbt + g('o_ex1') - g('o_ex2') - g('o_tax');
+  document.getElementById('t_inc').textContent = fmt(inc);
+  document.getElementById('t_gross').textContent = fmt(gross);
+  document.getElementById('t_op').textContent = fmt(op);
+  document.getElementById('t_pbt').textContent = fmt(pbt);
+  document.getElementById('t_net').textContent = fmt(net);
+  LAST = {A,P,sums,vals,inc,gross,op,pbt,net};
+  analyze(A, P, vals, net, pbt, g('o_tax'));
+  renderRatios(); renderAudit(); renderTax();
+  save();
+}
+
+function analyze(A, P, vals, net, pbt, tax){
+  let issues = [], diff = A - P;
+  let allZero = Object.values(vals).every(v => Math.abs(v) < 0.005) && Math.abs(net) < 0.005;
+  if(Math.abs(diff) >= 0.005) issues.push(['err','Баланс не сходится: активы '+fmt(A)+' ≠ пассивы '+fmt(P)+' (разница '+fmt(Math.abs(diff))+').']);
+  if(Math.abs(vals['8700'] - net) >= 0.5 && (Math.abs(vals['8700'])>0.005 || Math.abs(net)>0.005))
+    issues.push(['warn','Взаимоувязка ОФР↔баланс: нераспределённая прибыль (8700) = '+fmt(vals['8700'])+', чистая прибыль ОФР (9910) = '+fmt(net)+' — должны совпадать.']);
+  if(vals['5010'] < 0) issues.push(['err','Касса (5010) отрицательная ('+fmt(vals['5010'])+') — в кассе не может быть минуса.']);
+  if(vals['8300'] < 0) issues.push(['warn','Уставный капитал (8300) отрицательный — проверьте отражение убытков.']);
+  if(Math.abs(vals['6710'])<0.005 && (gv('o_sell')+gv('o_adm'))>0.005)
+    issues.push(['warn','Зарплата (6710) = 0 при наличии расходов по реализации/административных расходов — риск неполного учёта ФОТ.']);
+  if(vals['6410'] < 0) issues.push(['info','Перед бюджетом (6410) переплата '+fmt(-vals['6410'])+' — возможен зачёт/возврат.']);
+  if(pbt > 0 && tax <= 0) issues.push(['err','Прибыль до налога положительная ('+fmt(pbt)+'), а налог на прибыль (9810) = 0 — проверьте начисление.']);
+  if(pbt > 0 && tax > 0 && Math.abs(tax - 0.15*pbt) / (0.15*pbt) > 0.25)
+    issues.push(['warn','Налог на прибыль (9810) = '+fmt(tax)+' заметно отличается от 15% × прибыль до налога ('+fmt(0.15*pbt)+') — льготы или отложенный налог?']);
+  if(vals['6610'] > 0 && vals['6610'] > Math.max(vals['8700'],0))
+    issues.push(['warn','Дивиденды к оплате (6610 = '+fmt(vals['6610'])+') больше нераспределённой прибыли (8700).']);
+  if((Math.abs(vals['5210'])>0.005 || Math.abs(vals['5220'])>0.005 || Math.abs(vals['5020'])>0.005))
+    issues.push(['info','Есть валютные остатки — проверьте переоценку по курсу ЦБ РУз (блок «Валютный контроль»).']);
+  if(allZero) issues.push(['info','Все показатели нулевые — заполните данные или загрузите из облака.']);
+  document.getElementById('analysis').innerHTML = issues.map(i=>'<div class="'+i[0]+'">'+(i[0]==='err'?'⛔ ':i[0]==='warn'?'⚠️ ':'ℹ️ ')+i[1]+'</div>').join('');
+}
+
+function renderRatios(){
+  const {A,P,sums,vals,inc,net} = LAST;
+  const r2 = (v,d) => d ? v/d : null;
+  const TA = sums.ob, TL = sums.ca;
+  const Inv = (vals['1010']||0)+(vals['1020']||0)+(vals['1030']||0)+(vals['1040']||0)+(vals['GP']||0)+(vals['TOV']||0);
+  const Cash = (vals['5010']||0)+(vals['5020']||0)+(vals['5110']||0)+(vals['5210']||0)+(vals['5220']||0)+(vals['5610']||0);
+  const Cap = sums.cap, Debt = sums.ca + sums.lta;
+  const rows = [
+    ['Коэффициент текущей ликвидности', r2(TA,TL), 'норма ≥ 1,5–2'],
+    ['Коэффициент быстрой ликвидности', r2(TA-Inv,TL), 'норма ≥ 0,8–1'],
+    ['Коэффициент абсолютной ликвидности', r2(Cash,TL), 'норма ≥ 0,2'],
+    ['Коэффициент автономии (фин. независимости)', r2(Cap,A), 'норма ≥ 0,5'],
+    ['Соотношение заёмных и собственных средств', r2(Debt,Cap), 'норма ≤ 1'],
+    ['Рентабельность продаж (ROS), %', inc? net/inc*100 : null, 'чем выше, тем лучше'],
+    ['Рентабельность активов (ROA), %', A? net/A*100 : null, 'чем выше, тем лучше'],
+    ['Рентабельность собственного капитала (ROE), %', Cap? net/Cap*100 : null, 'чем выше, тем лучше'],
+  ];
+  const judge = (i,v) => {
+    if(v===null) return ['r-mid','н/д'];
+    if(i===0) return v>=1.5?['r-ok','хорошо']:v>=1?['r-mid','приемлемо']:['r-bad','низкая ликвидность'];
+    if(i===1) return v>=1?['r-ok','хорошо']:v>=0.5?['r-mid','приемлемо']:['r-bad','низкая'];
+    if(i===2) return v>=0.2?['r-ok','хорошо']:['r-mid','ниже нормы'];
+    if(i===3) return v>=0.5?['r-ok','устойчиво']:v>=0.3?['r-mid','зависимость от кредитов']:['r-bad','риск неплатёжеспособности'];
+    if(i===4) return v<=1?['r-ok','хорошо']:v<=2?['r-mid','умеренно']:['r-bad','высокий долг'];
+    return v>=15?['r-ok','отлично']:v>=5?['r-mid','хорошо']:v>=0?['r-mid','низкая']:['r-bad','убыток'];
+  };
+  document.getElementById('ratioTable').innerHTML = '<tr><td><b>Показатель</b></td><td class="amt"><b>Значение</b></td><td><b>Оценка</b></td><td class="code"><b>Норма</b></td></tr>' +
+    rows.map((r,i)=>{ const [cls,word] = judge(i,r[1]);
+      return '<tr><td>'+r[0]+'</td><td class="amt">'+(r[1]===null?'—':r[1].toLocaleString('ru-RU',{maximumFractionDigits:2}))+'</td><td><span class="'+cls+'" style="padding:3px 8px;border-radius:6px;">'+word+'</span></td><td class="code">'+r[2]+'</td></tr>';
+    }).join('');
+}
+
+function renderTax(){
+  const {inc,pbt,net} = LAST, vals = LAST.vals||{};
+  const ndsOut = inc * 12/112, ndsIn = vals['4410']||0, ndsPay = ndsOut - ndsIn;
+  const expTax = pbt > 0 ? pbt*0.15 : 0, actTax = parseNum(document.getElementById('o_tax').value)/unit();
+  document.getElementById('taxBlock').innerHTML =
+    '<b>НДС (12%):</b><br>Начисленный с выручки (×12/112): <b>'+fmt(ndsOut)+'</b><br>'+
+    'Входной НДС к возмещению (4410): <b>'+fmt(ndsIn)+'</b><br>'+
+    'Ориентир к уплате в бюджет: <b>'+fmt(ndsPay)+'</b> '+(ndsPay<0?'(отрицательное значение — ожидается возмещение/перенос)':'')+'<br>'+
+    '<span class="note">Сверьте с расчётом по счёту 6410. Декларация и уплата — не позднее 15-го числа месяца, следующего за отчётным.</span><br><br>'+
+    '<b>Налог на прибыль (15%):</b><br>Прибыль до налогообложения: <b>'+fmt(pbt)+'</b><br>'+
+    'Ожидаемый налог (15%): <b>'+fmt(expTax)+'</b> · Фактический (9810): <b>'+fmt(actTax)+'</b> · Отклонение: <b>'+fmt(actTax-expTax)+'</b><br>'+
+    '<span class="note">Отклонения возможны при льготах, отложенном налоге (0950/7250), убытках прошлых лет. Сверяйте с декларацией по налогу на прибыль.</span>';
+}
+
+function save(){
+  let d={date:document.getElementById('repdate').value, period:document.getElementById('period').value, unit:unit(), bal:{}, ofr:{}, fx:[]};
+  document.querySelectorAll('#bal tr.item').forEach((tr,i)=>d.bal[i]=tr.querySelector('input').value);
+  ['o_in1','o_in2','o_in3','o_cogs','o_sell','o_adm','o_oth','o_roy','o_div','o_pct','o_fx1','o_finc','o_fx2','o_fexp','o_ex1','o_ex2','o_tax'].forEach(id=>d.ofr[id]=document.getElementById(id).value);
+  document.querySelectorAll('tr[data-fx]').forEach(tr=>d.fx.push({ccy:tr.querySelector('.fx_ccy').value, amt:tr.querySelector('.fx_amt').value, r0:tr.querySelector('.fx_r0').value, r1:tr.querySelector('.fx_r1').value}));
+  d.fx_date = document.getElementById('fx_date').value;
+  try{ localStorage.setItem('finuz', JSON.stringify(d)); }catch(e){}
+  scheduleCloudSync();
+}
+function load(){
+  let d; try{ d=JSON.parse(localStorage.getItem('finuz')); }catch(e){}
+  if(!d) return;
+  document.getElementById('repdate').value=d.date||'';
+  document.getElementById('period').value=d.period||'Год';
+  if(d.unit) document.getElementById('unit').value=String(d.unit);
+  document.querySelectorAll('#bal tr.item').forEach((tr,i)=>{ if(d.bal && d.bal[i]!=null) tr.querySelector('input').value=d.bal[i]; });
+  for(let id in (d.ofr||{})){ const el=document.getElementById(id); if(el) el.value=d.ofr[id]; }
+  if(d.fx) document.querySelectorAll('tr[data-fx]').forEach((tr,i)=>{ const f=d.fx[i]; if(f){ tr.querySelector('.fx_ccy').value=f.ccy; tr.querySelector('.fx_amt').value=f.amt; tr.querySelector('.fx_r0').value=f.r0; tr.querySelector('.fx_r1').value=f.r1; } });
+  if(d.fx_date) document.getElementById('fx_date').value=d.fx_date;
+}
+function resetAll(){ if(confirm('Очистить все данные?')){ localStorage.removeItem('finuz'); document.querySelectorAll('input.amt, input.oamt, .fx_amt, .fx_r0, .fx_r1').forEach(i=>i.value=''); calc(); } }
+
+function buildReport(){
+  let u = unit()===1?'сум':'тыс.сум', esc = s => String(s).replace(/;/g,',');
+  let lines = ['Отчётная дата;'+(document.getElementById('repdate').value||'—')+';Период;'+document.getElementById('period').value];
+  lines.push('БАЛАНС ('+u+');;;'); lines.push('Статья;Счёт;Сумма;');
+  document.querySelectorAll('#bal tr').forEach(tr=>{
+    if(tr.querySelector('th')||tr.cells.length<2) return;
+    if(tr.classList.contains('sub')) lines.push(esc(tr.cells[0].textContent)+';;');
+    else if(tr.classList.contains('item')) lines.push(esc(tr.cells[0].textContent)+';'+tr.cells[1].textContent+';'+parseNum(tr.querySelector('input').value)/unit());
+    else { const cs=tr.cells; lines.push(esc(cs[0].textContent)+';;'+cs[cs.length-1].textContent.replace(/[\s\u00A0]/g,'')); }
+  });
+  lines.push(';;;'); lines.push('ОФР ('+u+');;'); lines.push('Показатель;Счёт;Сумма;');
+  document.querySelectorAll('#ofr tr').forEach(tr=>{
+    if(tr.querySelector('th')||tr.cells.length<2) return;
+    if(tr.classList.contains('sub')) lines.push(esc(tr.cells[0].textContent)+';;');
+    else if(tr.classList.contains('oitem')) lines.push(esc(tr.cells[0].textContent)+';'+tr.cells[1].textContent+';'+parseNum(tr.querySelector('input').value)/unit());
+    else { const cs=tr.cells; lines.push(esc(cs[0].textContent)+';;'+cs[cs.length-1].textContent.replace(/[\s\u00A0]/g,'')); }
+  });
+  return lines;
+}
+function downloadCSV(){
+  let lines = buildReport();
+  let blob = new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
+  let a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='otchetnost_'+(document.getElementById('repdate').value||'data')+'.csv'; a.click();
+}
+function downloadXLSX(){
+  if(typeof XLSX==='undefined'){ alert('Библиотека Excel не загрузилась (нужен интернет при первом открытии). Сохраняю в CSV.'); downloadCSV(); return; }
+  const wb = XLSX.utils.book_new(), nm = document.getElementById('repdate').value||'data';
+  const mk = (sel, sheet) => {
+    const aoa = []; let rowNo = 0; const grpRows = {}; const codeRow = {};
+    document.querySelectorAll(sel+' tr').forEach(tr=>{
+      if(tr.querySelector('th')||tr.cells.length<2) return;
+      rowNo++;
+      if(tr.classList.contains('sub')){ aoa.push([tr.cells[0].textContent,'','']); rowNo--; return; }
+      if(tr.classList.contains('item')||tr.classList.contains('oitem')){
+        const v = parseNum(tr.querySelector('input').value)/unit();
+        aoa.push([tr.cells[0].textContent, tr.cells[1].textContent, v]);
+        const cs = tr.dataset.grp || tr.querySelector('input').id;
+        (grpRows[cs] = grpRows[cs]||[]).push(rowNo);
+        if(tr.dataset.code) codeRow[tr.dataset.code]=rowNo;
+        return;
+      }
+      const label = tr.cells[0].textContent; let f = null;
+      if(sheet==='Баланс'){
+        for(const g of ['vna','ob','ca','lta','cap']) if(label.indexOf('ИТОГО')===0 && label.toLowerCase().indexOf(g==='ca'?'текущие обязательства':g==='lta'?'долгосрочные обязательства':g==='cap'?'капитал':g==='vna'?'внеоборотные':'оборотные')>=0 && grpRows[g]) f='SUM(D'+grpRows[g][0]+':D'+grpRows[g][grpRows[g].length-1]+')';
+        if(label.indexOf('ИТОГО АКТИВЫ')===0) f='D'+codeRow.A1;
+      }
+      aoa.push([label,'', f?{f, t:'n'}:parseNum(tr.cells[tr.cells.length-1].textContent)]);
+    });
+    // второй проход для формул итогов баланса
+    return aoa;
+  };
+  // Баланс: с явными формулами
+  const balAoa = []; let rN = 0; const gR = {}; let vnaR, obR, caR, ltaR, capR;
+  document.querySelectorAll('#bal tr').forEach(tr=>{
+    if(tr.querySelector('th')||tr.cells.length<2) return;
+    if(tr.classList.contains('sub')){ balAoa.push([tr.cells[0].textContent,'','']); return; }
+    rN = balAoa.length + 1;
+    if(tr.classList.contains('item')){
+      balAoa.push([tr.cells[0].textContent, tr.cells[1].textContent, parseNum(tr.querySelector('input').value)/unit()]);
+      (gR[tr.dataset.grp]=gR[tr.dataset.grp]||[]).push(rN); return;
+    }
+    const label = tr.cells[0].textContent;
+    if(label.indexOf('внеоборотные активы')>=0) vnaR=rN;
+    if(label.indexOf('оборотные активы')>=0) obR=rN;
+    if(label.indexOf('текущие обязательства')>=0) caR=rN;
+    if(label.indexOf('долгосрочные обязательства')>=0) ltaR=rN;
+    if(label.indexOf('ИТОГО капитал')===0) capR=rN;
+    let f=null;
+    for(const g of ['vna','ob','ca','lta','cap']) if(gR[g] && label.indexOf('ИТОГО')===0 && !f) f='SUM(D'+gR[g][0]+':D'+gR[g][gR[g].length-1]+')';
+    if(label.indexOf('ИТОГО АКТИВЫ')===0) f='D'+vnaR+'+D'+obR;
+    if(label.indexOf('ИТОГО ПАССИВЫ')===0) f='D'+caR+'+D'+ltaR+'+D'+capR;
+    balAoa.push([label,'', f?{f, t:'n'}:0]);
+  });
+  const ws1 = XLSX.utils.aoa_to_sheet([['БАЛАНС на '+(document.getElementById('repdate').value||'—')],['Статья','Счёт','Сумма']].concat(balAoa));
+  ws1['!cols']=[{wch:52},{wch:12},{wch:18}];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Баланс');
+  const ofrAoa = mk('#ofr','ОФР');
+  const ws2 = XLSX.utils.aoa_to_sheet([['ОФР за период: '+document.getElementById('period').value],['Показатель','Счёт','Сумма']].concat(ofrAoa));
+  ws2['!cols']=[{wch:52},{wch:12},{wch:18}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'ОФР');
+  XLSX.writeFile(wb, 'otchetnost_'+nm+'.xlsx');
+}
+
+function showTab(id,btn){
+  ['bal','ofr','an','ai'].forEach(t=>document.getElementById('tab-'+t).classList.add('hidden'));
+  document.getElementById('tab-'+id).classList.remove('hidden');
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+document.addEventListener('input', calc);
+document.getElementById('repdate').addEventListener('change', save);
+document.getElementById('period').addEventListener('change', save);
+document.getElementById('unit').addEventListener('change', calc);
+
+// === ВАЛЮТНЫЙ КОНТРОЛЬ ===
+async function loadRates(){
+  const d = document.getElementById('fx_date').value;
+  let any = false;
+  for(const tr of document.querySelectorAll('tr[data-fx]')){
+    const ccy = tr.querySelector('.fx_ccy').value;
+    let url = 'https://cbu.uz/ru/arkhiv-kursov-valyut/json/'+ccy+'/';
+    if(d){ const p = d.split('-'); url = 'https://cbu.uz/ru/arkhiv-kursov-valyut/json/'+ccy+'/'+p[2]+'.'+p[1]+'.'+p[0]+'/'; }
+    try{
+      const r = await fetch(url); if(!r.ok) throw 0;
+      const j = await r.json(); if(!j.length) throw 0;
+      tr.querySelector('.fx_r1').value = Number(j[0].Rate)/Number(j[0].Nominal||1);
+      any = true;
+    }catch(e){}
+  }
+  document.getElementById('fx_result').textContent = any ? 'Курсы ЦБ РУз загружены (колонка «Курс кон.»). Колонку «Курс нач.» заполните курсом на начало периода.' : 'Автозагрузка не удалась — введите курсы вручную с cbu.uz.';
+  calc();
+}
+function applyFx(){
+  let note = [], totalDiff = 0;
+  document.querySelectorAll('tr[data-fx]').forEach(tr=>{
+    const amt = parseNum(tr.querySelector('.fx_amt').value), r0 = parseNum(tr.querySelector('.fx_r0').value), r1 = parseNum(tr.querySelector('.fx_r1').value);
+    const sum = amt*r1, diff = amt*(r1-r0);
+    tr.querySelector('.fx_sum').textContent = fmt(sum);
+    tr.querySelector('.fx_diff').textContent = fmt(diff);
+    totalDiff += diff;
+    if(amt && r1){
+      const btr = document.querySelector('#bal tr.item[data-code="'+tr.dataset.code+'"]');
+      if(btr) btr.querySelector('input').value = sum;
+      note.push(tr.dataset.code+': '+fmt(amt)+' '+tr.querySelector('.fx_ccy').value+' × '+r1+' = '+fmt(sum)+' сум');
+    }
+  });
+  document.getElementById('fx_result').innerHTML = (note.length?note.join('<br>'):'Заполните сумму и курс.') +
+    (Math.abs(totalDiff)>0.005 ? '<br>Итоговая курсовая разница: <b>'+fmt(totalDiff)+'</b> сум → '+(totalDiff>0?'доход 9540':'убыток 9620')+'. Отразите её также в ОФР.' : '');
+  calc();
+}
+
+// === ОБЛАКО ===
+function cloudCfg(){ try{ return JSON.parse(localStorage.getItem('finuz_cloud')||'{}'); }catch(e){ return {}; } }
+let syncTimer = null;
+function setSyncStatus(t){ const el = document.getElementById('syncstatus'); if(el) el.textContent = t; }
+function scheduleCloudSync(){ const c = cloudCfg(); if(!c.bin || !c.key || !c.auto) return; clearTimeout(syncTimer); syncTimer = setTimeout(()=>cloudSave(true), 3000); }
+async function cloudSave(auto){
+  const c = cloudCfg();
+  if(!c.bin || !c.key){ if(!auto) alert('Сначала укажите Bin ID и X-Master-Key'); return; }
+  setSyncStatus('☁️ Сохраняю…');
+  try{
+    const r = await fetch('https://api.jsonbin.io/v3/b/'+c.bin, {method:'PUT', headers:{'Content-Type':'application/json','X-Master-Key':c.key}, body: localStorage.getItem('finuz')||'{}'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    setSyncStatus('✓ В облаке: ' + new Date().toLocaleTimeString());
+  }catch(e){ setSyncStatus('✗ Ошибка: ' + e.message); }
+}
+async function cloudLoad(){
+  const c = cloudCfg();
+  if(!c.bin || !c.key){ alert('Сначала укажите Bin ID и X-Master-Key'); return; }
+  setSyncStatus('☁️ Загружаю…');
+  try{
+    const r = await fetch('https://api.jsonbin.io/v3/b/'+c.bin, {headers:{'X-Master-Key':c.key}});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const j = await r.json();
+    if(j.record){ localStorage.setItem('finuz', JSON.stringify(j.record)); load(); calc(); }
+    setSyncStatus('✓ Загружено: ' + new Date().toLocaleTimeString());
+  }catch(e){ setSyncStatus('✗ Ошибка: ' + e.message); }
+}
+
+// === ЛИЧНЫЙ КАБИНЕТ (клиент серверного API) ===
+let srvToken = localStorage.getItem('finuz_token') || '';
+function srvBase(){ return (document.getElementById('aiproxy').value || '').trim().replace(/\/$/, ''); }
+function setSrvStatus(t){ const el = document.getElementById('srv_status'); if(el) el.textContent = t; }
+async function srvAuth(mode){
+  const base = srvBase();
+  if(!base){ setSrvStatus('Укажите URL сервера: Ассистент → ⚙️ → поле «URL прокси-сервера».'); return; }
+  const email = document.getElementById('srv_email').value.trim();
+  const password = document.getElementById('srv_pass').value;
+  setSrvStatus('Запрос к серверу…');
+  try{
+    const r = await fetch(base + '/api/' + mode, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email, password})});
+    const j = await r.json();
+    if(!r.ok){ setSrvStatus('✗ ' + (j.error || ('HTTP ' + r.status))); return; }
+    srvToken = j.token; localStorage.setItem('finuz_token', srvToken);
+    setSrvStatus('✓ Выполнен вход: ' + j.email + '. Теперь можно сохранять отчёты на сервере.');
+  }catch(e){ setSrvStatus('✗ Нет связи с сервером: ' + e.message); }
+}
+function srvOut(){ srvToken=''; localStorage.removeItem('finuz_token'); setSrvStatus('Вы вышли. Токен удалён с устройства.'); }
+async function srvSave(){
+  const base = srvBase();
+  if(!base || !srvToken){ setSrvStatus('Сначала войдите (и укажите URL сервера).'); return; }
+  setSrvStatus('Сохраняю на сервере…');
+  try{
+    const r = await fetch(base + '/api/report', {method:'PUT', headers:{'Content-Type':'application/json','Authorization':'Bearer '+srvToken}, body: JSON.stringify({data: JSON.parse(localStorage.getItem('finuz') || '{}')})});
+    const j = await r.json();
+    if(!r.ok){ setSrvStatus('✗ ' + (j.error || ('HTTP ' + r.status))); return; }
+    setSrvStatus('✓ Отчёт сохранён на сервере ' + new Date().toLocaleTimeString());
+  }catch(e){ setSrvStatus('✗ Ошибка: ' + e.message); }
+}
+async function srvLoad(){
+  const base = srvBase();
+  if(!base || !srvToken){ setSrvStatus('Сначала войдите (и укажите URL сервера).'); return; }
+  setSrvStatus('Загружаю с сервера…');
+  try{
+    const r = await fetch(base + '/api/report', {headers:{'Authorization':'Bearer '+srvToken}});
+    const j = await r.json();
+    if(!r.ok){ setSrvStatus('✗ ' + (j.error || ('HTTP ' + r.status))); return; }
+    if(j.data){ localStorage.setItem('finuz', JSON.stringify(j.data)); load(); calc(); setSrvStatus('✓ Загружено с сервера (обновлено: ' + (j.updated_at||'—') + ')'); }
+    else setSrvStatus('На сервере пока нет сохранённого отчёта.');
+  }catch(e){ setSrvStatus('✗ Ошибка: ' + e.message); }
+}
+
+// === ИИ-АССИСТЕНТ ===
+let sessionKey = '';
+function aiCfg(){ let saved={}; try{ saved=JSON.parse(localStorage.getItem('finuz_ai')||'{}'); }catch(e){}
+  return {key: saved.key || sessionKey, on: saved.on, proxy: saved.proxy||'', saved: !!saved.key}; }
+function saveAiCfg(){
+  const on = document.getElementById('aion').checked, saveK = document.getElementById('aisave').checked;
+  if(saveK && document.getElementById('aikey').value.trim()) localStorage.setItem('finuz_ai', JSON.stringify({key:document.getElementById('aikey').value.trim(), on:on, proxy:document.getElementById('aiproxy').value.trim()}));
+  else { sessionKey = document.getElementById('aikey').value.trim(); try{ const s=JSON.parse(localStorage.getItem('finuz_ai')||'{}'); s.key=''; s.on=on; s.proxy=document.getElementById('aiproxy').value.trim(); localStorage.setItem('finuz_ai', JSON.stringify(s)); }catch(e){} }
+}
+function delKey(){ sessionKey=''; document.getElementById('aikey').value=''; localStorage.removeItem('finuz_ai'); document.getElementById('aion').checked=false; addMsg('Ключ удалён с устройства.','bot'); }
+
+const ACCOUNTS = {
+ '0100':'Основные средства — имущество сроком службы более года (здания, машины, оборудование).',
+ '0200':'Нематериальные активы — ПО, патенты, лицензии, товарные знаки.',
+ '0800':'Капитальные вложения — затраты на приобретение/строительство ОС до ввода в эксплуатацию.',
+ '0910':'Векселя полученные — долгосрочные векселя в вашу пользу.',
+ '0940':'Прочая долгосрочная дебиторская задолженность.',
+ '0950':'Отложенные налоговые активы (ОНА) — по временным разницам.',
+ '1010':'Сырьё и материалы.', '1020':'Покупные полуфабрикаты и материалы.', '1030':'Топливо.', '1040':'Запасные части.',
+ '4010':'Дебиторская задолженность покупателей и заказчиков.',
+ '4410':'НДС, подлежащий возмещению — «входной» НДС поставщиков (ставка 12%).',
+ '4910':'Резерв по сомнительным долгам — уменьшает дебиторку, вычитается в балансе.',
+ '5010':'Касса в национальной валюте.', '5020':'Касса в иностранной валюте.',
+ '5110':'Расчётный счёт — деньги в банке в сумах.',
+ '5210':'Валютные счета внутри страны — переоценка по курсу ЦБ РУз.', '5220':'Валютные счета за рубежом.',
+ '5610':'Денежные эквиваленты — вложения до 3 месяцев.', '5710':'Переводы в пути.',
+ '5810':'Краткосрочные инвестиции (ценные бумаги).', '5830':'Краткосрочные займы выданные.', '5920':'Прочие текущие активы.',
+ '6010':'Платежи поставщикам и подрядчикам.', '6020':'Векселя выданные.',
+ '6250':'Отсроченный налог на прибыль (текущая часть).', '6310':'Авансы, полученные от покупателей.',
+ '6410':'Задолженность по платежам в бюджет (в т.ч. выходной НДС).',
+ '6510':'Платежи по страхованию.', '6520':'Государственные целевые фонды.',
+ '6610':'Дивиденды к оплате.', '6710':'Задолженность по оплате труда.', '6720':'Депонированная зарплата.',
+ '6810':'Краткосрочные банковские кредиты.', '6820':'Краткосрочные займы.',
+ '6920':'Начисленные проценты к уплате.', '6950':'Долгосрочные обязательства — текущая часть.', '6990':'Прочие обязательства.',
+ '7010':'Долгосрочные платежи поставщикам.', '7250':'Отложенные налоговые обязательства (ОНО).',
+ '7310':'Авансы, полученные (долгосрочная часть).',
+ '7810':'Долгосрочные банковские кредиты.', '7820':'Долгосрочные займы.',
+ '7910':'Финансовая аренда (лизинг) к оплате.', '7920':'Прочие долгосрочные задолженности.',
+ '8300':'Уставный капитал (для АО — акции: 8310 простые).',
+ '8700':'Нераспределённая прибыль (непокрытый убыток) — должна совпадать с итогом ОФР (9910).',
+ '9010':'Доходы от реализации готовой продукции.', '9020':'Доходы от реализации товаров.', '9030':'Доходы от работ и услуг.',
+ '9110':'Себестоимость реализованной готовой продукции (вычитается).', '9120':'Себестоимость реализованных товаров.', '9130':'Себестоимость работ и услуг.',
+ '9410':'Расходы по реализации.', '9420':'Административные расходы.', '9430':'Прочие операционные расходы.',
+ '9510':'Роялти к получению.', '9520':'Дивиденды к получению.', '9530':'Проценты к получению.',
+ '9540':'Доходы от валютных курсовых разниц.', '9590':'Прочие доходы от финансовой деятельности.',
+ '9610':'Расходы в виде процентов.', '9620':'Убытки от валютных курсовых разниц.', '9690':'Прочие финансовые расходы.',
+ '9710':'Чрезвычайные прибыли.', '9720':'Чрезвычайные убытки.',
+ '9810':'Расходы по налогу на прибыль (базовая ставка 15%).', '9910':'Конечный финансовый результат (чистая прибыль/убыток).'
+};
+function botReplyOffline(q){
+  let t = q.toLowerCase();
+  if(/проверь|проверить|проверка/.test(t) && /баланс/.test(t)){
+    let A = parseNum(document.getElementById('t_A').textContent), P = parseNum(document.getElementById('t_P').textContent), d = A - P;
+    if(Math.abs(d) < 0.005) return '✅ Баланс сходится: активы = пассивы = ' + fmt(A) + ' сум.';
+    return '⚠️ Баланс НЕ сходится.\nАктивы: ' + fmt(A) + '\nПассивы: ' + fmt(P) + '\nРазница: ' + fmt(Math.abs(d)) + ' (больше в ' + (d>0?'активе':'пассиве') + ').\nПроверьте:\n— 8700 = чистой прибыли ОФР (9910);\n— все ли обязательства учтены (6710, 6410, 6310, 6810/7810);\n— знаки: убыток — со знаком минус.';
+  }
+  for(let code in ACCOUNTS){ if(t.includes(code)) return code + ' — ' + ACCOUNTS[code]; }
+  if(/не сход|расхожден|ошибк/.test(t)) return 'Диагностика:\n1. Плашка и блок «Анализ» под балансом показывают несоответствия автоматически.\n2. Главное: 8700 = 9910.\n3. Строки «(−)» в ОФР вводятся положительными.\n4. Курсовые разницы — 9540/9620.\n5. Резерв 4910 вводится положительным — вычитается сам.';
+  if(/коэффициент|ликвидн|рентабельн|анализ|платёжеспособн/.test(t)) return 'Вкладка «📈 Анализ» считает автоматически: текущую/быструю/абсолютную ликвидность, автономию, соотношение заёмных и собственных средств, ROS, ROA, ROE — с нормами и оценкой каждого показателя.';
+  if(/ндс|налог/.test(t)) return 'Вкладка «📈 Анализ» → «Налоговый контроль»: НДС с выручки (×12/112) против входного 4410, ориентир к уплате; налог на прибыль 15% против фактического 9810. Сроки: НДС — до 15-го числа следующего месяца.';
+  if(/офр|финансовых результат|прибыль|доход|заполнить/.test(t))
+    return 'ОФР по НСБУ №21:\n1. Доходы: 9010+9020+9030.\n2. Минус себестоимость 9110–9130 → валовая прибыль.\n3. Минус 9410/9420/9430 → операционная прибыль.\n4. Плюс/минус финансовые 9510–9690 (включая курсовые 9540/9620) → прибыль до налога.\n5. Плюс 9710, минус 9720, минус 9810 (обычно 15%) → 9910.\nИтог 9910 → на счёт 8700 баланса.';
+  if(/курсов|переоценк|валют/.test(t)) return 'Вкладка «Баланс» → блок «💱 Валютный контроль»: для счетов 5020/5210/5220 введите сумму в валюте и курсы на начало/конец периода (кнопка загружает курс ЦБ РУз с cbu.uz на выбранную дату). Разница = курсовая разница → 9540 (доход) или 9620 (убыток).';
+  if(/зарплат|оплат[аы] труда|6710/.test(t)) return ACCOUNTS['6710'];
+  if(/уставн|капитал/.test(t)) return ACCOUNTS['8300'];
+  if(/скачать|excel|xlsx|csv/.test(t)) return 'Кнопка «⬇ Скачать Excel (.xlsx)» выгружает баланс и ОФР на двух листах с живыми формулами SUM (итоги пересчитываются в Excel). Нужен интернет при первом открытии приложения (библиотека SheetJS с CDN). Есть и CSV-вариант.';
+  if(/привет|здравств|салом/.test(t)) return 'Салом! Спрашивайте: счета, проверка баланса, ОФР, НДС, курсовые разницы, коэффициенты.';
+  return 'Могу подсказать по:\n— счетам НСБУ №21 («что такое 7810»)\n— «проверь баланс» / «почему не сходится»\n— «как заполнить ОФР», НДС, курсовые разницы\n— «коэффициенты» (ликвидность, рентабельность).\nНапишите код счёта или вопрос словами.';
+}
+async function botReply(q){
+  const ai = aiCfg();
+  const body = JSON.stringify({model:'gpt-4o-mini',messages:[{role:'system',content:'Ты — помощник бухгалтера по НСБУ Узбекистана (НСБУ №21). Отвечай кратко, по делу, на русском.'},{role:'user',content:q}]});
+  if(ai.proxy && navigator.onLine){
+    try{
+      const ctrl = new AbortController(); const _to = setTimeout(()=>ctrl.abort(), 25000);
+      const r = await fetch(ai.proxy.replace(/\/$/,'')+'/api/chat',{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json'},body});
+      clearTimeout(_to);
+      if(r.ok){ const j = await r.json(); if(j.choices && j.choices[0]) return j.choices[0].message.content.trim(); }
+    }catch(e){}
+  }
+  if(ai.on && ai.key && navigator.onLine){
+    try{
+      const ctrl = new AbortController(); const _to = setTimeout(()=>ctrl.abort(), 25000);
+      const r = await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json','Authorization':'Bearer '+ai.key},body});
+      clearTimeout(_to);
+      if(r.ok){ const j = await r.json(); if(j.choices && j.choices[0]) return j.choices[0].message.content.trim(); }
+    }catch(e){}
+  }
+  return botReplyOffline(q);
+}
+function addMsg(txt, who){
+  let d = document.createElement('div'); d.className = 'msg ' + who; d.textContent = txt;
+  let log = document.getElementById('chatlog'); log.appendChild(d); log.scrollTop = log.scrollHeight;
+}
+async function sendMsg(){
+  let inp = document.getElementById('chatinput'), q = inp.value.trim(); if(!q) return;
+  inp.value = ''; addMsg(q, 'user');
+  let log = document.getElementById('chatlog');
+  let t = document.createElement('div'); t.className = 'msg bot'; t.textContent = 'печатает…';
+  log.appendChild(t); log.scrollTop = log.scrollHeight;
+  let reply = await botReply(q);
+  t.remove(); addMsg(reply, 'bot');
+}
+function ask(q){ document.getElementById('chatinput').value = q; sendMsg(); }
+
+
+// === УМНЫЙ ВВОД (текст + голос) ===
+const SMART_MAP = [
+ [/выручк|доход от реал|реализац/i,'o_in1'],
+ [/себестоимост/i,'o_cogs'], [/коммерчес/i,'o_sell'], [/административн|управленчес/i,'o_adm'],
+ [/проч.*операц.*расход/i,'o_oth'], [/налог на прибыль/i,'o_tax'],
+ [/процент.*(к уплат|расход)|финрасход/i,'o_fexp'], [/курсов/i,'o_fx1'],
+ [/касс/i,'5010'], [/расч[её]тн/i,'5110'], [/валютн/i,'5210'],
+ [/дебитор|покупател/i,'4010'], [/кредитор|поставщик/i,'6010'],
+ [/зарплат|оплат[аы] труда/i,'6710'], [/депонир/i,'6720'],
+ [/бюджет/i,'6410'], [/ндс/i,'4410'], [/уставн/i,'8300'],
+ [/нераспредел[её]нн|чист(ая|ой) прибыль/i,'8700'],
+ [/займ|кредит/i,'7810'], [/основн.*средств|ос\b/i,'0100'],
+ [/готов(ая|ой) продукц/i,'GP'], [/товар/i,'TOV'],
+ [/материал|сырь/i,'1010'], [/топлив/i,'1030'], [/нма|нематериальн/i,'0200'],
+];
+function setTarget(id, amt){
+  let el = document.getElementById(id);
+  if(!el) el = document.querySelector('#bal tr.item[data-code="'+id+'"] input');
+  if(el){ el.value = amt; return true; }
+  return false;
+}
+function smartParse(){
+  const txt = document.getElementById('smarttxt').value;
+  const lines = txt.split(/[\n;.]+/).map(x=>x.trim()).filter(Boolean);
+  let applied = [], missed = [];
+  lines.forEach(line=>{
+    let target = null;
+    for(const [re,id] of SMART_MAP){ if(re.test(line)){ target = id; break; } }
+    const m = line.replace(/,/g,'.').match(/(\d+(?:\s?\d{3})*(?:\.\d+)?)\s*(млрд|миллиард\w*|млн|миллион\w*|тыс|тысяч\w*)?/i);
+    if(!target || !m){ missed.push(line); return; }
+    let amt = parseFloat(m[1].replace(/\s/g,''));
+    const mult = /млрд|миллиард/i.test(m[2]||'') ? 1e9 : /млн|миллион/i.test(m[2]||'') ? 1e6 : /тыс|тысяч/i.test(m[2]||'') ? 1e3 : 1;
+    amt *= mult;
+    if(setTarget(target, amt)) applied.push('«'+line+'» → '+target);
+    else missed.push(line);
+  });
+  calc();
+  document.getElementById('smartres').innerHTML = (applied.length?'✓ Распределено:<br>'+applied.join('<br>'):'') +
+    (missed.length?'<br>⚠ Не распознано: '+missed.join('; ')+'<br>Переформулируйте: «счёт + сумма», например «расчётный счёт 45 млн».':'') +
+    '<br>Проверьте внесённые суммы перед сдачей отчётности.';
+}
+async function smartParseAI(){
+  const txt = document.getElementById('smarttxt').value.trim();
+  if(!txt) return;
+  const ai = aiCfg();
+  if(!(ai.proxy || (ai.on && ai.key && navigator.onLine))){
+    document.getElementById('smartres').textContent = 'ИИ не подключён (нет прокси/ключа или офлайн) — работают офлайн-правила.';
+    smartParse(); return;
+  }
+  document.getElementById('smartres').textContent = 'ИИ распознаёт операции…';
+  const sys = 'Извлеки хозяйственные операции из текста бухгалтера. Ответь ТОЛЬКО JSON-массивом вида [{"target":"5110","amount":5200000}] без пояснений. target — код счёта баланса (0100,0200,0800,0910,0940,0950,1010,1020,1030,1040,GP,TOV,4010,4410,4910,5010,5020,5110,5210,5220,5610,5710,5810,5830,5920,6010,6020,6250,6310,6410,6510,6520,6610,6710,6720,6810,6820,6920,6950,6990,7010,7250,7310,7810,7820,7910,7920,8300,8700) или код строки ОФР (o_in1,o_in2,o_in3,o_cogs,o_sell,o_adm,o_oth,o_roy,o_div,o_pct,o_fx1,o_finc,o_fx2,o_fexp,o_ex1,o_ex2,o_tax). Суффиксы: млн=×1000000, тыс=×1000, млрд=×1000000000. Если операция не подходит ни к одному коду — пропусти её.';
+  try{
+    let j;
+    const msgs = [{role:'system',content:sys},{role:'user',content:txt}];
+    if(ai.proxy){
+      const r = await fetch(ai.proxy.replace(/\/$/,'')+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-4o-mini',messages:msgs})});
+      if(!r.ok) throw new Error('HTTP '+r.status); j = await r.json();
+    } else {
+      const r = await fetch('https://api.openai.com/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ai.key},body:JSON.stringify({model:'gpt-4o-mini',messages:msgs})});
+      if(!r.ok) throw new Error('HTTP '+r.status); j = await r.json();
+    }
+    const content = j.choices[0].message.content.trim().replace(/```(json)?/g,'');
+    const ops = JSON.parse(content);
+    let applied = 0, missed = 0;
+    (Array.isArray(ops)?ops:[]).forEach(o=>{ if(setTarget(o.target, Number(o.amount))) applied++; else missed++; });
+    calc();
+    document.getElementById('smartres').innerHTML = '✓ ИИ распределил '+applied+' операций.'+(missed?' Не применено: '+missed+' (неизвестный код или сумма).':'')+' Проверьте внесённые суммы.';
+  }catch(e){
+    document.getElementById('smartres').textContent = 'ИИ-разбор не удался ('+e.message+') — пробую офлайн-правила.';
+    smartParse();
+  }
+}
+function startVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ document.getElementById('smartres').textContent = 'Голосовой ввод не поддерживается этим браузером. Откройте приложение в Chrome на Android.'; return; }
+  const rec = new SR();
+  rec.lang = 'ru-RU'; rec.continuous = false; rec.interimResults = false;
+  rec.onresult = e => { const t = document.getElementById('smarttxt'); t.value = (t.value ? t.value+' ' : '') + e.results[0][0].transcript; };
+  rec.onerror = e => { document.getElementById('smartres').textContent = 'Ошибка распознавания: '+e.error+'. Проверьте разрешение на микрофон.'; };
+  rec.onend = () => { document.getElementById('smartres').textContent = 'Готово. Нажмите «Разнести».'; };
+  rec.start();
+  document.getElementById('smartres').textContent = '🎤 Слушаю… скажите, например: «выручка сто пятьдесят миллионов, касса пять миллионов».';
+}
+
+// === OCR (Tesseract.js + pdf.js) — оптимизировано для слабых устройств ===
+let OCR_BUSY = false;
+// Уменьшение изображения до maxDim px (по большей стороне) + JPEG-сжатие
+function fitCanvas(src, maxDim){
+  const w0 = src.width || src.naturalWidth || src.videoWidth;
+  const h0 = src.height || src.naturalHeight || src.videoHeight;
+  const k = Math.min(1, maxDim / Math.max(w0, h0));
+  const cv = document.createElement('canvas');
+  cv.width = Math.max(1, Math.round(w0 * k));
+  cv.height = Math.max(1, Math.round(h0 * k));
+  cv.getContext('2d').drawImage(src, 0, 0, cv.width, cv.height);
+  return cv;
+}
+async function runOCR(){
+  if(OCR_BUSY) return; // защита от двойного нажатия
+  const f = document.getElementById('ocrfile').files[0];
+  const st = document.getElementById('ocr_status'), bar = document.getElementById('ocrbar');
+  const setP = (pct, msg) => { if(bar) bar.style.width = Math.min(100, Math.round(pct)) + '%'; st.textContent = msg; };
+  if(!f){ st.textContent = 'Сначала выберите фото или PDF.'; return; }
+  OCR_BUSY = true;
+  let watchdog = null;
+  try{
+    // Лимит разрешения: на устройствах с малым объёмом RAM — меньше
+    const weak = (navigator.deviceMemory && navigator.deviceMemory < 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4);
+    const maxDim = weak ? 1200 : 1800;
+    setP(3, 'Чтение файла…');
+    let imageData;
+    if(f.type === 'application/pdf'){
+      setP(8, 'Рендер PDF…');
+      const pdf = await pdfjsLib.getDocument({data: await f.arrayBuffer()}).promise;
+      const page = await pdf.getPage(1); // первая страница — обычно достаточно для счёта-фактуры/чека
+      const vp = page.getViewport({scale: 1.6});
+      const cv = document.createElement('canvas'); cv.width = vp.width; cv.height = vp.height;
+      await page.render({canvasContext: cv.getContext('2d'), viewport: vp}).promise;
+      const fitted = fitCanvas(cv, maxDim);
+      imageData = fitted.toDataURL('image/jpeg', 0.85);
+      setP(15, 'PDF отрендерен и сжат до ' + fitted.width + '×' + fitted.height);
+    } else {
+      const url = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+      const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+      const fitted = fitCanvas(img, maxDim);
+      imageData = fitted.toDataURL('image/jpeg', 0.85);
+      setP(15, 'Сжато: ' + img.naturalWidth + '×' + img.naturalHeight + ' → ' + fitted.width + '×' + fitted.height + ' (JPEG 85%)');
+    }
+    document.getElementById('ocr_prev').src = imageData;
+    if(typeof Tesseract === 'undefined'){ setP(0, 'OCR-движок не загрузился (нужен интернет при первом открытии).'); OCR_BUSY = false; return; }
+    setP(20, 'Распознаю на устройстве…');
+    // Защитный таймаут 3 мин: если OCR завис — принудительно завершаем
+    watchdog = setTimeout(() => {
+      try{ Tesseract.terminate(); }catch(e){}
+      setP(0, 'Прервано защитным таймаутом (3 мин). Попробуйте более чёткое фото меньшего размера.');
+      OCR_BUSY = false;
+    }, 180000);
+    const res = await Tesseract.recognize(imageData, 'rus+eng', {
+      logger: m => { if(m.status && m.progress != null) setP(20 + 75 * m.progress, 'OCR: ' + m.status + ' ' + Math.round(m.progress * 100) + '%'); }
+    });
+    clearTimeout(watchdog); watchdog = null;
+    setP(98, 'Разношу по счетам…');
+    document.getElementById('smarttxt').value = res.data.text;
+    smartParse();
+    setP(100, 'Готово. Проверьте распознанные суммы.');
+  }catch(e){
+    if(watchdog){ clearTimeout(watchdog); }
+    setP(0, 'Ошибка: ' + e.message);
+  }
+  OCR_BUSY = false;
+}
+
+// === РАСШИРЕННЫЙ АУДИТ ===
+function renderAudit(){
+  const {sums, vals, inc} = LAST;
+  const days = {'Месяц':30,'Квартал':90,'Год':360}[document.getElementById('period').value] || 360;
+  const Inv = (vals['1010']||0)+(vals['1020']||0)+(vals['1030']||0)+(vals['1040']||0)+(vals['GP']||0)+(vals['TOV']||0);
+  const DZ = vals['4010']||0, KZ = vals['6010']||0, cogs = gv('o_cogs');
+  const sos = sums.ob - sums.ca;
+  const wc = sums.ob ? sos/sums.ob : null;
+  const t = (num, den) => (num>0 && den>0) ? num/den : null;
+  const invT = t(cogs, Inv), dzT = t(inc, DZ), kzT = t(cogs, KZ);
+  const d = x => x ? days/x : null;
+  const invD = d(invT), dzD = d(dzT), kzD = d(kzT);
+  const cycle = (invD||0)+(dzD||0), finCycle = cycle-(kzD||0);
+  const f2 = x => x===null ? '—' : x.toLocaleString('ru-RU',{maximumFractionDigits:1});
+  const rows = [
+    ['Собственные оборотные средства (СОС)', f2(sos), '≥ 0'],
+    ['Коэффициент обеспеченности СОС', f2(wc), '≥ 0,1'],
+    ['Оборачиваемость запасов, раз / дни', invT===null?'—':f2(invT)+' / '+f2(invD), 'дни ↓ лучше'],
+    ['Оборачиваемость дебиторки, раз / дни', dzT===null?'—':f2(dzT)+' / '+f2(dzD), 'дни ↓ лучше'],
+    ['Оборачиваемость кредиторки, раз / дни', kzT===null?'—':f2(kzT)+' / '+f2(kzD), 'дни ↑ лучше'],
+    ['Операционный цикл, дней', f2(cycle), 'запасы + ДЗ'],
+    ['Финансовый цикл, дней', f2(finCycle), 'цикл − КЗ; ↓ лучше'],
+  ];
+  document.getElementById('auditTable').innerHTML = '<tr><td><b>Показатель</b></td><td class="amt"><b>Значение</b></td><td class="code"><b>Ориентир</b></td></tr>' +
+    rows.map(r=>'<tr><td>'+r[0]+'</td><td class="amt">'+r[1]+'</td><td class="code">'+r[2]+'</td></tr>').join('') +
+    '<tr><td colspan="3" class="note">Для расчёта оборотов нужны выручка (9010–9030) и себестоимость (9110–9130) за тот же период. Отрицательный финансовый цикл — деньги покупателей приходят раньше, чем вы платите поставщикам (хорошо).</td></tr>';
+}
+
+// === ИНИЦИАЛИЗАЦИЯ ===
+(function(){
+  try{
+    const man = {name:'ФинОтчётность Уз', short_name:'ФинОтчёт УЗ', start_url:'.', display:'standalone',
+      background_color:'#1F4E78', theme_color:'#1F4E78',
+      icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="%231F4E78"/><text x="50" y="66" font-size="44" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold">Сум</text></svg>', sizes:'any', type:'image/svg+xml'}]};
+    const l = document.createElement('link'); l.rel = 'manifest';
+    l.href = URL.createObjectURL(new Blob([JSON.stringify(man)],{type:'application/json'}));
+    document.head.appendChild(l);
+  }catch(e){}
+  const cc = cloudCfg();
+  document.getElementById('cbin').value = cc.bin||'';
+  document.getElementById('ckey').value = cc.key||'';
+  document.getElementById('cauto').checked = !!cc.auto;
+  ['cbin','ckey','cauto'].forEach(id=>document.getElementById(id).addEventListener('change', ()=>{
+    localStorage.setItem('finuz_cloud', JSON.stringify({bin:document.getElementById('cbin').value.trim(), key:document.getElementById('ckey').value.trim(), auto:document.getElementById('cauto').checked}));
+  }));
+  const ac = aiCfg();
+  document.getElementById('aikey').value = ac.key||'';
+  document.getElementById('aion').checked = !!ac.on;
+  document.getElementById('aisave').checked = !!ac.saved;
+  document.getElementById('aiproxy').value = ac.proxy||'';
+  ['aikey','aion','aiproxy'].forEach(id=>document.getElementById(id).addEventListener('change', saveAiCfg));
+  document.getElementById('aishow').addEventListener('change', e=>{ document.getElementById('aikey').type = e.target.checked ? 'text' : 'password'; });
+})();
+function updNet(){ document.getElementById('netdot').textContent = navigator.onLine ? '🟢 онлайн' : '⚪ офлайн — локальный режим'; }
+window.addEventListener('online', updNet);
+window.addEventListener('offline', updNet);
+window.addEventListener('storage', e=>{ if(e.key==='finuz'){ load(); calc(); } });
+if(srvToken) setSrvStatus('✓ Вход на сервере выполнен (токен сохранён).');
+updNet();
+load(); calc();
+</script>
+</body>
+</html>
