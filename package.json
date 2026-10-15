@@ -2,10 +2,10 @@
   "name": "finotchetnost-uz-server",
   "version": "2.0.0",
   "private": true,
-  "description": "Express + JWT + SQLite backend",
+  "description": "Express + JWT + PostgreSQL",
   "main": "server.js",
   "scripts": {
-    "start": "node \"сервер(1).js\""
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=18"
@@ -17,6 +17,6 @@
     "express-rate-limit": "^7.4.0",
     "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3",
-    "sqlite3": "^5.1.7"
+    "pg": "^8.11.3"
   }
 }
